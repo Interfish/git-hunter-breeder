@@ -1,0 +1,11 @@
+def config
+  {
+    access_token: ''.freeze, # your github access token
+    search_words: [
+      'remove password',
+      'delete password',
+      'update password',
+      'password',
+    ].freeze,
+  }
+end
