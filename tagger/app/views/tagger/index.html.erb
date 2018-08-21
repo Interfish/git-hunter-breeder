@@ -1,0 +1,61 @@
+<div id="container" style="margin-left:20%;margin-left:20%;" data-index="<%= @index %>">
+  <div><%= 'File Name:  ' + @file_name %></div>
+  <hr>
+  <div>
+    <%= raw @marked_content %>
+  </div>
+  <hr>
+  <div style="margin-top: 50px;">Keyboard Short Cut</div>
+  <div>A: label as leaked</div>
+  <div>S: ignore it</div>
+  <div>D: label as normal</div>
+  <div>->: next sample</div>
+  <div><-: prev sample</div>
+</div>
+
+<script>
+  $(document).ready(function(){
+    var index = parseInt($("#container").data("index"));
+    $(document).keyup(function(event){
+      var code = event.keyCode;
+      if(code == 37){ // left arrow
+        window.location.replace('/?index=' + (index - 1).toString());
+      }else if(code == 39){ // right arrow
+        window.location.replace('/?index=' + (index + 1).toString());
+      }else if(code == 65){ // A
+        $.post(
+          "/",
+          {
+            index: index.toString(),
+            tag: "leaked"
+          },
+          function(){
+            $("#container").append('<div style="font-size:40px;color:red">Leaked!</div>');
+          }
+        )
+      }else if(code == 83){ // S
+        $.post(
+          "/",
+          {
+            index: index.toString(),
+            tag: 'ignore'
+          },
+          function(){
+            $("#container").append('<div style="font-size:40px;">Ignore</div>');
+          }
+        )
+      }else if (code == 68){ // D
+        $.post(
+          "/",
+          {
+            index: index.toString(),
+            tag: 'normal'
+          },
+          function(){
+            $("#container").append('<div style="font-size:40px;color:green">Normal</div>');
+          }
+        )
+      }
+    })
+  })
+</script>
