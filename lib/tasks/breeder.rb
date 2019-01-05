@@ -1,40 +1,34 @@
-require 'json'
-require 'net/http'
-require 'base64'
-require_relative './config.rb'
-require_relative './analyser.rb'
+PER_PAGE = 10
 
 namespace :breeder do
   desc 'breedeing data from github'
   task :breed, [:key_words, :number] => [:environment] do |task, args|
-    
-  
+    search_word, number = args
+    (number / PER_PAGE).times do |page|
+      begin
+        puts "================ Analysing page #{page + 1} word: #{search_word}  ===================="
+        url = "https://api.github.com/search/commits?q=#{search_word}&per_page=#{PER_PAGE}&page=#{page + 1}&acess_token=#{config[:access_token]}"
+        uri = URI(url)
+        req = Net::HTTP::Get.new(uri)
+        req['Accept'] = 'application/vnd.github.cloak-preview'
+        http = Net::HTTP.new(uri.hostname, uri.port)
+        http.use_ssl = (uri.scheme == "https")
+        res = http.request(req)
+        res = JSON.parse(res.body)
+        raise CustomError, 'Reached search rate limit! Try again later' if res['message']
+        analyse_page(res)
+      rescue CustomError => e
+        puts e.message
+        sleep 30
+        retry
+      ensure
+        sleep 5
+      end
+    end
   end
 end
 
-PROJECT_ROOT = File.expand_path(__dir__).freeze
-RESULT_DIR = 'result'.freeze
-PER_PAGE = 10.freeze
-GITHUB_MAX_RESULT = 1000.freeze
 
-class CustomError < StandardError;end
-
-def prepare_dir
-  $dir = RESULT_DIR + '_' + Time.now.strftime('%y%m%d%H%M%S')
-  `cd #{PROJECT_ROOT} && mkdir -p #{$dir}`
-end
-
-def save_file(addition, deletion)
-  file_name = "#{$file_count.to_s + '_addition'}.txt"
-  File.open([PROJECT_ROOT, $dir, file_name].join('/'), 'w') do |f|
-    f.write(addition)
-  end
-  file_name = "#{$file_count.to_s + '_deletion'}.txt"
-  File.open([PROJECT_ROOT, $dir, file_name].join('/'), 'w') do |f|
-    f.write(deletion)
-  end
-  $file_count += 1
-end
 
 def analyse_block(lines, head, tail, file_name)
   if tail - 1 >= head && tail - head < 51
