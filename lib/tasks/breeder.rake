@@ -7,7 +7,8 @@ namespace :breeder do
     PER_PAGE = 10
     ACCESS_TOKEN = Rails.application.credentials[:github_access_token].freeze
     search_word, number = args[:search_word], args[:number].to_i
-    (number.to_f / PER_PAGE).ceil.times do |page|
+    actual_number = 0
+    while new_number < number do
       puts "================ Analysing page #{page + 1} word: #{search_word}  ===================="
       url = "https://api.github.com/search/commits?q=#{search_word}&per_page=#{PER_PAGE}&page=#{page + 1}&acess_token=#{ACCESS_TOKEN}"
       uri = URI(url)
@@ -17,7 +18,7 @@ namespace :breeder do
       http.use_ssl = (uri.scheme == "https")
       res = http.request(req)
       raise res.code + ' ' + res.body if res.code != '200'
-      body = JSON.parse(res.body)
+      body = JSON.parse(res.body, actual_number)
       analyse_page(body)
     rescue  => e
       puts e.message
@@ -29,7 +30,7 @@ namespace :breeder do
     end
   end
 
-  def analyse_page(res)
+  def analyse_page(res, actual_number)
     res['items'].each do |info|
       this_url = info['url'] + "?access_token=#{ACCESS_TOKEN}"
       res = Net::HTTP.get_response(URI(this_url))
@@ -46,9 +47,9 @@ namespace :breeder do
         tail = 0
         while tail < content.size
           if tail == content.size - 1
-            analyse_block(content, head, tail + 1, file['filename'], sha)
+            analyse_block(content, head, tail + 1, file['filename'], sha, actual_number)
           elsif content[tail].match?(/@@.*?@@/)
-            analyse_block(content, head, tail, file['filename'], sha)
+            analyse_block(content, head, tail, file['filename'], sha, actual_number)
             content[tail].gsub!(/@@.*?@@/, '')
             head = tail
           end
@@ -63,7 +64,7 @@ namespace :breeder do
     end
   end
 
-  def analyse_block(lines, head, tail, file_name, sha)
+  def analyse_block(lines, head, tail, file_name, sha, actual_number)
     if tail - 1 >= head && tail - head < 21
       addition = ''
       deletion = ''
