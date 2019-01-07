@@ -14,7 +14,7 @@ ActiveRecord::Schema.define(version: 2019_01_05_040927) do
 
   create_table "code_snippets", force: :cascade do |t|
     t.string "key"
-    t.string "path"
+    t.string "file_name"
     t.text "content"
     t.string "indices"
     t.integer "status"

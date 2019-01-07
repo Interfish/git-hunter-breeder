@@ -7,7 +7,7 @@
   <hr>
   <div style="margin-top: 50px;">Keyboard Short Cut</div>
   <div>A: label as leaked</div>
-  <div>S: ignore it</div>
+  <div>S: label as unsure</div>
   <div>D: label as normal</div>
   <div>->: next sample</div>
   <div><-: prev sample</div>
@@ -41,10 +41,10 @@
           "/",
           {
             index: index.toString(),
-            tag: 'ignore'
+            tag: 'unsure'
           },
           function(){
-            $("#container").append('<div style="font-size:40px;">Ignore</div>');
+            $("#container").append('<div style="font-size:40px;">Unsure</div>');
             setTimeout(() => {
               window.location.replace('/?index=' + (index + 1).toString());
             }, 500);

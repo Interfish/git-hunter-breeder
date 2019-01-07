@@ -4,59 +4,63 @@ require 'pp'
 namespace :breeder do
   desc 'breedeing data from github'
   task :breed, [:search_word, :number] => [:environment] do |task, args|
-    PER_PAGE = 10
     ACCESS_TOKEN = Rails.application.credentials[:github_access_token].freeze
-    search_word, number = args[:search_word], args[:number].to_i
-    actual_number = 0
-    while new_number < number do
-      puts "================ Analysing page #{page + 1} word: #{search_word}  ===================="
-      url = "https://api.github.com/search/commits?q=#{search_word}&per_page=#{PER_PAGE}&page=#{page + 1}&acess_token=#{ACCESS_TOKEN}"
-      uri = URI(url)
-      req = Net::HTTP::Get.new(uri)
-      req['Accept'] = 'application/vnd.github.cloak-preview'
-      http = Net::HTTP.new(uri.hostname, uri.port)
-      http.use_ssl = (uri.scheme == "https")
-      res = http.request(req)
-      raise res.code + ' ' + res.body if res.code != '200'
-      body = JSON.parse(res.body, actual_number)
-      analyse_page(body)
-    rescue  => e
-      puts e.message
-      puts e.backtrace.slice(0..5).join("\n")
-      sleep 30
-      retry
-    ensure
-      sleep 5
+    PER_PAGE = 10
+    search_word, target_fetch = args[:search_word], args[:number].to_i
+    $actual_fetch = 0 
+    page = 1
+    while $actual_fetch < target_fetch do
+      begin
+        puts "================ Analysing page #{page} word: #{search_word}  ===================="
+        url = "https://api.github.com/search/commits?q=#{search_word}&per_page=#{PER_PAGE}&page=#{page}&acess_token=#{ACCESS_TOKEN}"
+        uri = URI(url)
+        req = Net::HTTP::Get.new(uri)
+        req['Accept'] = 'application/vnd.github.cloak-preview'
+        http = Net::HTTP.new(uri.hostname, uri.port)
+        http.use_ssl = (uri.scheme == "https")
+        res = http.request(req)
+        raise res.code + ' ' + res.body if res.code != '200'
+        body = JSON.parse(res.body)
+        analyse_page(body)
+        page += 1
+        puts "Actual fetch: #{$actual_fetch}"
+      rescue  StandardError => e
+        puts e.message
+        puts e.backtrace.slice(0..5).join("\n")
+        sleep 30
+        retry
+      ensure
+        sleep 5
+      end
     end
   end
 
-  def analyse_page(res, actual_number)
+  def analyse_page(res)
     res['items'].each do |info|
       this_url = info['url'] + "?access_token=#{ACCESS_TOKEN}"
       res = Net::HTTP.get_response(URI(this_url))
       raise res.code + ' ' + res.body if res.code != '200'
       body = JSON.parse(res.body)
       #puts body['html_url']
-      next if body['files'].size > 20
+      next if body['files'].size > 10
       sha = body['sha']
       body['files']&.each do |file|
         next if file['patch'].nil?
-        puts file['filename']
         content = file['patch'].force_encoding('UTF-8').lines
         head = 0
         tail = 0
         while tail < content.size
           if tail == content.size - 1
-            analyse_block(content, head, tail + 1, file['filename'], sha, actual_number)
+            analyse_block(content, head, tail + 1, file['filename'], sha)
           elsif content[tail].match?(/@@.*?@@/)
-            analyse_block(content, head, tail, file['filename'], sha, actual_number)
+            analyse_block(content, head, tail, file['filename'], sha)
             content[tail].gsub!(/@@.*?@@/, '')
             head = tail
           end
           tail += 1
         end
       end
-    rescue  => e
+    rescue StandardError => e
       puts e.message
       puts e.backtrace.slice(0..5).join("\n")
       sleep 30
@@ -64,7 +68,7 @@ namespace :breeder do
     end
   end
 
-  def analyse_block(lines, head, tail, file_name, sha, actual_number)
+  def analyse_block(lines, head, tail, file_name, sha)
     if tail - 1 >= head && tail - head < 21
       addition = ''
       deletion = ''
@@ -81,14 +85,23 @@ namespace :breeder do
       end
       addition_key = sha + '/' + file_name + "#{head}/#{tail}/addition"
       deletion_key = sha + '/' + file_name + "#{head}/#{tail}/deletion"
-      CodeSnippet.where(key: addition_key).first_or_create(
-        path: file_name,
-        content: addition,
-      )
-      CodeSnippet.where(key: deletion_key).first_or_create(
-        path: file_name,
-        content: deletion,
-      )
+      unless CodeSnippet.find_by(key: addition_key)
+        CodeSnippet.create(
+          key: addition_key,
+          file_name: file_name,
+          content: addition
+        )
+        $actual_fetch += 1
+      end
+      unless CodeSnippet.find_by(key: deletion_key)
+        CodeSnippet.create(
+          key: deletion_key,
+          file_name: file_name,
+          content: deletion
+        )
+        $actual_fetch += 1
+        puts file_name
+      end
     end
   end
 end
