@@ -1,0 +1,2 @@
+class CodeSnippet < ApplicationRecord
+end
