@@ -20,6 +20,7 @@ ActiveRecord::Schema.define(version: 2019_01_05_040927) do
     t.integer "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_code_snippets_on_key", unique: true
   end
 
 end
