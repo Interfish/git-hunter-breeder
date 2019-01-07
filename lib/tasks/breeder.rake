@@ -59,6 +59,7 @@ namespace :breeder do
       puts e.message
       puts e.backtrace.slice(0..5).join("\n")
       sleep 30
+      retry
     end
   end
 
