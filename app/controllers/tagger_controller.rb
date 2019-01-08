@@ -1,10 +1,12 @@
 class TaggerController < ApplicationController
   include Analyser
   include Renderer
-  
+
+  skip_before_action :verify_authenticity_token
+
   def index
     @index = params[:index].present? ? params[:index].to_i : CodeSnippet.not_classified.first.id
-    @index = [[0, @index].max, CodeSnippet.last.id].min 
+    @index = [[1, @index].max, CodeSnippet.last.id].min
     @snippet = CodeSnippet.find(@index)
     content = @snippet.content
     suspects = analyse_content(content)
@@ -22,7 +24,17 @@ class TaggerController < ApplicationController
              when  'normal'
                0
              end
-    CodeSnippet.find(params.require(:index)).update!(status: status)
+    snippet = CodeSnippet.find(params.require(:index))
+    if params.require(:tag) != 'normal'
+      indices = params[:criticals].split("\n").map do |crit|
+        head = snippet.content.index(crit)
+        tail = head + crit.size - 1
+        [head, tail]
+      end
+    else
+      indices = []
+    end
+    snippet.update!(status: status, indices: indices)
     render json: { status: 200, msg: 'ok' }
   end
 end

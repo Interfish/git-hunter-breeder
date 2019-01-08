@@ -5,35 +5,14 @@ module Analyser
   HEX_CHARS = '1234567890abcdefABCDEF'
 
   def analyse_content(content)
-    sensitive_marks = analyse_sensitive_word(content)
     key_word_marks = analyse_key_word(content)
     password_marks = password_analyse(content)
-    result_marks = if !key_word_marks.empty? && !password_marks.empty?
-                     trim(sensitive_marks, key_word_marks, password_marks)
-                   else
-                     trim(sensitive_marks)
-                   end
-  end
-
-  def analyse_sensitive_word(block)
-    marks = []
-    SENSITIVE_WORDS.each do |word|
-      if word =~ /\p{Han}/  # Chinese Character
-        block.scan(/(#{word})/) do |match|
-          marks << [Regexp.last_match.begin(0), Regexp.last_match.end(0)]
-        end
-      else
-        block.scan(/[^a-zA-Z0-9]#{word}[^a-zA-Z0-9]/i) do |match|
-          marks << [Regexp.last_match.begin(0) + 1, Regexp.last_match.end(0) - 1]
-        end
-      end
-    end
-    marks
+    result_marks = trim( key_word_marks, password_marks)
   end
 
   def analyse_key_word(block)
     marks = []
-    KEY_WORDS.each do |pattern|
+    Rails.application.config.key_words.each do |pattern|
       block.scan(pattern) do |match|
         marks << [Regexp.last_match.begin(0) + 1, Regexp.last_match.end(0) - 1]
       end
@@ -61,15 +40,6 @@ module Analyser
       return true if hexEntropy > 3
     end
     false
-  end
-
-  def condense(block, arr)
-    result = "Too large to display. Please view snippet on GitHub. Contains words:\n"
-    words = []
-    arr.each do |index_arr|
-      words << block.slice(index_arr[0]..index_arr[1])
-    end
-    result + words.uniq.join(', ')
   end
 
   # trim the array, cause those arrays could be overlaped
@@ -112,7 +82,7 @@ module Analyser
     return entropy
   end
 
-  def get_strings_of_set(word, char_set, threshold=SHANNON_ENTROPHY_THRESHOLD)
+  def get_strings_of_set(word, char_set, threshold=8)
     letters = ""
     strings = []
     word.each_char do |char|
@@ -126,5 +96,4 @@ module Analyser
     strings << letters if letters.length > threshold
     return strings
   end
-
 end

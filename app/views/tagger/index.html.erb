@@ -1,22 +1,31 @@
-<div id="container" style="margin-left:20%;margin-left:20%;" data-index="<%= @index %>">
+<div id="container" style="margin-left:400px;margin-right:400px" data-index="<%= @index %>">
   <div><%= 'File Name:  ' + @file_name %></div>
   <hr>
   <div>
     <%= raw @marked_content %>
   </div>
   <hr>
-  <div style="margin-top: 50px;">Keyboard Short Cut</div>
-  <div>A: label as leaked</div>
-  <div>S: label as unsure</div>
-  <div>D: label as normal</div>
-  <div>->: next sample</div>
-  <div><-: prev sample</div>
+  <div style="margin-top: 50px;display:flex;">
+    <div>
+      <div>Keyboard Short Cut</div>
+      <div>A: label as leaked</div>
+      <div>S: label as unsure</div>
+      <div>D: label as normal</div>
+      <div>->: next sample</div>
+      <div><-: prev sample</div>
+    </div>
+    <div>
+      <textarea style="height:200px;width:400px;margin-left:300px"></textarea>
+    </div>
+  </div>
+
 </div>
 
 <script>
   $(document).ready(function(){
     var index = parseInt($("#container").data("index"));
     $(document).keyup(function(event){
+      if ($("textarea").is(":focus")) { return }
       var code = event.keyCode;
       if(code == 37){ // left arrow
         window.location.replace('/?index=' + (index - 1).toString());
@@ -27,7 +36,8 @@
           "/",
           {
             index: index.toString(),
-            tag: "leaked"
+            tag: "leaked",
+            criticals: $("textarea").val()
           },
           function(){
             $("#container").append('<div style="font-size:40px;color:red">Leaked!</div>');
@@ -35,13 +45,14 @@
               window.location.replace('/?index=' + (index + 1).toString());
             }, 500);
           }
-        )
+        ).fail(function() { $("#container").append('<div style="font-size:60px;color:red">failed!</div>') })
       }else if(code == 83){ // S
         $.post(
           "/",
           {
             index: index.toString(),
-            tag: 'unsure'
+            tag: 'unsure',
+            criticals: $("textarea").val()
           },
           function(){
             $("#container").append('<div style="font-size:40px;">Unsure</div>');
@@ -49,7 +60,7 @@
               window.location.replace('/?index=' + (index + 1).toString());
             }, 500);
           }
-        )
+        ).fail(function() { $("#container").append('<div style="font-size:60px;color:red">failed!</div>') })
       }else if (code == 68){ // D
         $.post(
           "/",
@@ -63,7 +74,7 @@
               window.location.replace('/?index=' + (index + 1).toString());
             }, 500);
           }
-        )
+        ).fail(function() { $("#container").append('<div style="font-size:60px;color:red">failed!</div>') })
       }
     })
   })
