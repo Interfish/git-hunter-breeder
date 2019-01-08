@@ -1,12 +1,12 @@
 <div id="container" style="margin-left:400px;margin-right:400px" data-index="<%= @index %>">
   <div><%= 'File Name:  ' + @file_name %></div>
   <hr>
-  <div>
+  <pre>
     <%= raw @marked_content %>
-  </div>
+  </pre>
   <hr>
   <div style="margin-top: 50px;display:flex;">
-    <div>
+    <div style="min-width: 200px">
       <div>Keyboard Short Cut</div>
       <div>A: label as leaked</div>
       <div>S: label as unsure</div>
@@ -15,7 +15,7 @@
       <div><-: prev sample</div>
     </div>
     <div>
-      <textarea style="height:200px;width:400px;margin-left:300px"></textarea>
+      <textarea style="height:200px;width:400px;"></textarea>
     </div>
   </div>
 

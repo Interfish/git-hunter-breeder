@@ -17,7 +17,8 @@ module Renderer
   end
 
   def format_snippet(content)
-    content = content.gsub(/\n|\r|\r\n/, '<br>')
+    # Comment below to use pre tag instead
+    # content = content.gsub(/\n|\r|\r\n/, '<br>')
     content = content.gsub(/=mARk~/, '<mark>')
     content = content.gsub(/=!mARk~/, '</mark>')
   end
