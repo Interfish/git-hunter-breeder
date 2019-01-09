@@ -1,7 +1,7 @@
 <div id="container" style="margin-left:400px;margin-right:400px" data-index="<%= @index %>">
   <div><%= 'File Name:  ' + @file_name %></div>
   <hr>
-  <pre>
+  <pre style="max-width:1000px;overflow-x:auto">
     <%= raw @marked_content %>
   </pre>
   <hr>
