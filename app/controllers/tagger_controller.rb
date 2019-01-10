@@ -5,7 +5,7 @@ class TaggerController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def index
-    @index = params[:index].present? ? params[:index].to_i : CodeSnippet.not_classified.first.id
+    @index = params[:index].present? ? params[:index].to_i : CodeSnippet.unclassified.first.id
     @index = [[1, @index].max, CodeSnippet.last.id].min
     @snippet = CodeSnippet.find(@index)
     content = @snippet.content

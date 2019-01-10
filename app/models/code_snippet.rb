@@ -1,6 +1,6 @@
 class CodeSnippet < ApplicationRecord
     serialize :indices, Array
-    scope :not_classified,  -> { where(status: nil) }
+    scope :unclassified,  -> { where(status: nil) }
     scope :unsure, -> { where(status: 2) }
     scope :leaked, -> { where(status: 1) }
     scope :normal, -> { where(status: 0) }
