@@ -5,13 +5,23 @@ class TaggerController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def index
-    @index = params[:index].present? ? params[:index].to_i : (CodeSnippet.unclassified.first&.id || CodeSnippet.last.id)
-    @index = [[1, @index].max, CodeSnippet.last.id].min
-    @snippet = CodeSnippet.find(@index)
+    @snippet = CodeSnippet.find(params.require(:index))
     content = @snippet.content
     suspects = analyse_content(content)
     @file_name = @snippet.file_name
     @marked_content = get_snippet(content, suspects)
+  end
+
+  def query
+    if params[:index].present?
+      if params.require(:direction) == 'prev'
+        redirect_to '/tag?index=' + (CodeSnippet.where('id < ?', params[:index]).last&.id || CodeSnippet.first.id).to_s
+      elsif params.require(:direction) == 'next'
+        redirect_to '/tag?index=' + (CodeSnippet.where('id > ?', params[:index]).first&.id || CodeSnippet.last.id).to_s
+      end
+    else
+      redirect_to '/tag?index=' + (CodeSnippet.unclassified.first&.id || CodeSnippet.last.id).to_s
+    end
   end
 
   def tag

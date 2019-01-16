@@ -1,4 +1,4 @@
-<div id="container" style="margin-left:200px;margin-right:200px" data-index="<%= @index %>">
+<div id="container" style="margin-left:200px;margin-right:200px" data-index="<%= @snippet.id %>">
   <% unless @snippet.status.nil? %>
     <div style="font-size:25px">
       <span>Alreday classified as&nbsp;</span>
@@ -43,9 +43,9 @@
       if ($("textarea").is(":focus")) { return }
       var code = event.keyCode;
       if(code == 37){ // left arrow
-        window.location.replace('/?index=' + (index - 1).toString());
+        window.location.replace('/?index=' + index.toString() + '&direction=prev');
       }else if(code == 39){ // right arrow
-        window.location.replace('/?index=' + (index + 1).toString());
+        window.location.replace('/?index=' + index.toString() + '&direction=next');
       }else if(code == 65){ // A
         $.post(
           "/",
@@ -57,7 +57,7 @@
           function(){
             $("#container").append('<div style="font-size:40px;color:red">Leaked!</div>');
             setTimeout(() => {
-              window.location.replace('/?index=' + (index + 1).toString());
+              window.location.replace('/?index=' + index.toString() + '&direction=next');
             }, 500);
           }
         ).fail(function() { $("#container").append('<div style="font-size:60px;color:red">failed!</div>') })
@@ -72,7 +72,7 @@
           function(){
             $("#container").append('<div style="font-size:40px;">Unsure</div>');
             setTimeout(() => {
-              window.location.replace('/?index=' + (index + 1).toString());
+              window.location.replace('/?index=' + index.toString() + '&direction=next');
             }, 500);
           }
         ).fail(function() { $("#container").append('<div style="font-size:60px;color:red">failed!</div>') })
@@ -86,7 +86,7 @@
           function(){
             $("#container").append('<div style="font-size:40px;color:green">Normal</div>');
             setTimeout(() => {
-              window.location.replace('/?index=' + (index + 1).toString());
+              window.location.replace('/?index=' + index.toString() + '&direction=next');
             }, 500);
           }
         ).fail(function() { $("#container").append('<div style="font-size:60px;color:red">failed!</div>') })
