@@ -1,4 +1,19 @@
 <div id="container" style="margin-left:200px;margin-right:200px" data-index="<%= @index %>">
+  <% unless @snippet.status.nil? %>
+    <div style="font-size:25px">
+      <span>Alreday classified as&nbsp;</span>
+      <% case @snippet.status %>
+      <% when 0 %>
+        <span style="color:green">Normal</span>
+      <% when 1 %>
+        <span>Unsure</span>
+      <% when 2 %>
+        <span style="color:red">Leaked</span>
+      <% when 3 %>
+        <span style="color:gray">Ignore</span>
+      <% end %>
+    </div>
+  <% end %>
   <div><%= 'File Name:  ' + @file_name %></div>
   <hr>
   <pre style="max-width:1500px;overflow-x:auto">
