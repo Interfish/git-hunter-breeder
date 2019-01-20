@@ -25,7 +25,7 @@ class TaggerController < ApplicationController
   end
 
   def tag
-    params.permit(tag: %w{leaked unsure normal})
+    params.permit(tag: %w{leaked unsure normal discard})
     status = case params.require(:tag)
              when 'leaked'
                1
@@ -35,6 +35,11 @@ class TaggerController < ApplicationController
                0
              end
     snippet = CodeSnippet.find(params.require(:index))
+    if params.require(:tag) == 'discard'
+      snippet.destroy!
+      render json: { status: 200, msg: 'ok' }
+      return
+    end
     if params.require(:tag) != 'normal'
       indices = params[:criticals].split("\n").map do |crit|
         head = snippet.content.index(crit)

@@ -26,6 +26,7 @@
       <div>A: label as leaked</div>
       <div>S: label as unsure</div>
       <div>D: label as normal</div>
+      <div>P: discard this sample</div>
       <div>->: next sample</div>
       <div><-: prev sample</div>
     </div>
@@ -90,7 +91,21 @@
             }, 500);
           }
         ).fail(function() { $("#container").append('<div style="font-size:60px;color:red">failed!</div>') })
-      }
+      }else if (code == 80){ // P
+        $.post(
+          "/",
+          {
+            index: index.toString(),
+            tag: 'discard'
+          },
+          function(){
+            $("#container").append('<div style="font-size:40px;color:red">Discard</div>');
+            setTimeout(() => {
+              window.location.replace('/?index=' + index.toString() + '&direction=next');
+            }, 500);
+          }
+        ).fail(function() { $("#container").append('<div style="font-size:60px;color:red">failed!</div>') })
+      } 
     })
   })
 </script>
