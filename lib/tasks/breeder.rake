@@ -35,6 +35,24 @@ namespace :breeder do
     end
   end
 
+  task :change_index, [:index, :indices] => [:environment] do |task, args|
+    snippet = CodeSnippet.find(args[:index])
+    indices = []
+
+    if args[:indices].nil?
+      puts 'Indices ...'
+    else
+      args[:indices].split(';').each do |indice|
+        indices << [indice.split(' ').first.to_i, indice.split(' ').last.to_i]
+      end
+      snippet.update!(indices: indices)
+      puts 'New indices ...'
+    end
+    snippet.indices.each do |indice|
+      puts "#{indice} : #{snippet.content.slice(indice.first..indice.last)}"
+    end
+  end
+
   def analyse_page(res)
     res['items'].each do |info|
       this_url = info['url'] + "?access_token=#{ACCESS_TOKEN}"

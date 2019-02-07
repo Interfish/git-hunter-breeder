@@ -2,6 +2,8 @@ class TaggerController < ApplicationController
   include Analyser
   include Renderer
 
+  # 重新标注 leaked and normal 的 index： 949
+
   skip_before_action :verify_authenticity_token
 
   def index
