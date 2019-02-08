@@ -2,7 +2,10 @@ class TaggerController < ApplicationController
   include Analyser
   include Renderer
 
-  # 重新标注 leaked and normal 的 index： 949
+  # 重新标注 leaked and normal 的 index： 2557
+  # 不需要标注的：
+  # private key
+  # secret.json
 
   skip_before_action :verify_authenticity_token
 
