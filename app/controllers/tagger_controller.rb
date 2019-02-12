@@ -2,10 +2,15 @@ class TaggerController < ApplicationController
   include Analyser
   include Renderer
 
-  # 重新标注 leaked and normal 的 index： 2745
   # 不需要标注的：
   # private key
   # secret.json
+
+  # 试过的一些关键词
+  # delete password
+  # remove password
+  # remove secret
+  # remove token
 
   skip_before_action :verify_authenticity_token
 
