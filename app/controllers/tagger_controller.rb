@@ -11,6 +11,8 @@ class TaggerController < ApplicationController
   # remove password
   # remove secret
   # remove token
+  # remove passphrase 含金率较低
+  # delete passphrase 含金率较低
 
   skip_before_action :verify_authenticity_token
 
