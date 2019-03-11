@@ -1,0 +1,2 @@
+class DiscardedSnippet < ApplicationRecord
+end

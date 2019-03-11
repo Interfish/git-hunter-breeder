@@ -7,7 +7,7 @@ namespace :breeder do
     ACCESS_TOKEN = Rails.application.credentials[:github_access_token].freeze
     PER_PAGE = 10
     search_word, target_fetch = args[:search_word], args[:number].to_i
-    $actual_fetch = 0 
+    $actual_fetch = 0
     page = 1
     while $actual_fetch < target_fetch do
       begin
@@ -103,7 +103,7 @@ namespace :breeder do
       end
       addition_key = sha + '/' + file_name + "#{head}/#{tail}/addition"
       deletion_key = sha + '/' + file_name + "#{head}/#{tail}/deletion"
-      unless CodeSnippet.find_by(key: addition_key)
+      unless snippet_exist?(addition_key)
         CodeSnippet.create(
           key: addition_key,
           file_name: file_name,
@@ -111,7 +111,7 @@ namespace :breeder do
         )
         $actual_fetch += 1
       end
-      unless CodeSnippet.find_by(key: deletion_key)
+      unless snippet_exist?(deletion_key)
         CodeSnippet.create(
           key: deletion_key,
           file_name: file_name,
@@ -121,5 +121,9 @@ namespace :breeder do
         puts file_name
       end
     end
+  end
+
+  def snippet_exist?(key)
+    CodeSnippet.exists?(key: key) || DiscardedSnippet.exists?(key: key)
   end
 end

@@ -49,6 +49,7 @@ class TaggerController < ApplicationController
              end
     snippet = CodeSnippet.find(params.require(:index))
     if params.require(:tag) == 'discard'
+      DiscardedSnippet.create(key: snippet.key)
       snippet.destroy!
       render json: { status: 200, msg: 'ok' }
       return
